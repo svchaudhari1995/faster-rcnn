@@ -181,7 +181,7 @@ classifier = nn.classifier(shared_layers, roi_input, C.num_rois, nb_classes=len(
 print("built classifier")
 model_rpn = Model(img_input, rpn_layers)
 print("built model_rpn")
-model_classifier_only = Model([feature_map_input, roi_input], classifier)
+model_classifier_only = Model([shared_layers, roi_input], classifier)
 print("model_classifier_only")
 model_classifier = Model([feature_map_input, roi_input], classifier)
 print("built model_classifier")
