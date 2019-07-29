@@ -62,7 +62,7 @@ def get_map(pred, gt, f):
         T[pred_class].append(int(found_match))
 
     for gt_box in gt:
-        if not gt_box['bbox_matched'] and not gt_box['difficult']:
+        if not gt_box['bbox_matched'] :
             if gt_box['class'] not in P:
                 P[gt_box['class']] = []
                 T[gt_box['class']] = []
