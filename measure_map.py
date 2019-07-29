@@ -160,7 +160,7 @@ if K.image_dim_ordering() == 'th':
 else:
     print("Non theano")
     input_shape_img = (None, None, 3)
-    input_shape_features = (None, None, 1024)
+    input_shape_features = (None, None, 1088)
 
 print("Input holder")
 # input placeholder 정의
