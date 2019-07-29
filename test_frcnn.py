@@ -42,7 +42,7 @@ elif C.network == 'inception_resnet_v2':
     import keras_frcnn.inception_resnet_v2 as nn
 elif C.network == 'vgg':
     import keras_frcnn.vgg as nn
-
+print("---------------------------",C.network,"----------------")
 # turn off any data augmentation at test time
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
