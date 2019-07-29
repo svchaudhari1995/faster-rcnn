@@ -6,7 +6,7 @@ import pickle
 from optparse import OptionParser
 import time
 from keras_frcnn import config
-import keras_frcnn.resnet as nn
+import keras_frcnn.inception_resnet_v2 as nn
 from keras import backend as K
 from keras.layers import Input
 from keras.models import Model
@@ -96,7 +96,7 @@ if not options.test_path:   # if filename is not given
 if options.parser == 'pascal_voc':
     from keras_frcnn.pascal_voc_parser import get_data
 elif options.parser == 'simple':
-    from keras_frcnn.simple_parser import get_data
+    from keras_frcnn.simple_parser_map import get_data
 else:
     raise ValueError("Command line option parser must be one of 'pascal_voc' or 'simple'")
 
@@ -147,47 +147,55 @@ if 'bg' not in class_mapping:
     class_mapping['bg'] = len(class_mapping)
 
 class_mapping = {v: k for k, v in class_mapping.items()}
+print("Class mapping")
 print(class_mapping)
 
 class_to_color = {class_mapping[v]: np.random.randint(0, 255, 3) for v in class_mapping}
 C.num_rois = int(options.num_rois)
 
 if K.image_dim_ordering() == 'th':
+    print("Theano")
     input_shape_img = (3, None, None)
     input_shape_features = (1024, None, None)
 else:
+    print("Non theano")
     input_shape_img = (None, None, 3)
     input_shape_features = (None, None, 1024)
 
-
+print("Input holder")
 # input placeholder 정의
 img_input = Input(shape=input_shape_img)
 roi_input = Input(shape=(C.num_rois, 4))
 feature_map_input = Input(shape=input_shape_features) #??
 
+
+print("Input base")
 # define the base network (resnet here, can be VGG, Inception, etc)
 shared_layers = nn.nn_base(img_input, trainable=True)
-
+print("Input RPN")
 # define the RPN, built on the base layers
 num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
 rpn_layers = nn.rpn(shared_layers, num_anchors)
-
+print("got rpn layers")
 classifier = nn.classifier(feature_map_input, roi_input, C.num_rois, nb_classes=len(class_mapping), trainable=True)
-
+print("built classifier")
 model_rpn = Model(img_input, rpn_layers)
+print("built model_rpn")
 model_classifier_only = Model([feature_map_input, roi_input], classifier)
-
+print("model_classifier_only")
 model_classifier = Model([feature_map_input, roi_input], classifier)
-
+print("built model_classifier")
+print(C.model_path)
 model_rpn.load_weights(C.model_path, by_name=True)
+print("loaded")
 model_classifier.load_weights(C.model_path, by_name=True)
-
+print("classifierloaded")
 model_rpn.compile(optimizer='sgd', loss='mse')
 model_classifier.compile(optimizer='sgd', loss='mse')
-
+print("get data")
 all_imgs, _, _ = get_data(options.test_path)
 test_imgs = [s for s in all_imgs if s['imageset'] == 'test']
-
+print("Test images",len(test_imgs))
 
 T = {}
 P = {}
